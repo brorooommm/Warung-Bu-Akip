@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warung Bu Akip - Sign In</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-white flex justify-center items-center min-h-screen overflow-hidden relative">
+
+  <div class="w-[1440px] h-[1024px] relative bg-white overflow-hidden">
+    
+    <!-- BACKGROUND LENGKUNG -->
+    <div class="absolute left-[672px] top-0 w-[768px] h-[1024px]">
+      <img src="bglogin1.png" alt="Background Lengkung" class="w-full h-full object-cover">
+    </div>
+
+    <!-- ILUSTRASI DI DEPAN BACKGROUND -->
+    <img src="unsplash_42VIMQZU1nw.png" alt="Ilustrasi Warung"
+      class="absolute left-[74px] top-[206px] w-[530px] h-auto rounded-lg z-[5]">
+
+    <!-- BALON & DEKORASI -->
+    <div class="absolute w-10 h-10 left-[809px] top-[161px] bg-red-100/20 rounded-full z-[2]"></div>
+    <div class="absolute w-20 h-20 left-[40px] top-[97px] bg-green-900/20 rounded-full z-[2]"></div>
+    <div class="absolute w-20 h-20 left-[696px] top-[710px] bg-green-900/20 rounded-full z-[2]"></div>
+    <div class="absolute w-5 h-5 left-[677px] top-[861px] bg-green-900/20 rounded-full z-[2]"></div>
+    <div class="absolute w-4 h-4 left-[545px] top-[881px] bg-green-900/20 rounded-full z-[2]"></div>
+    <div class="absolute w-36 h-36 left-[580px] top-[950px] bg-green-900/20 rounded-full z-[2]"></div>
+    <div class="absolute w-20 h-20 left-[274px] top-[907px] bg-green-900/20 rounded-full z-[2]"></div>
+    <div class="absolute w-11 h-11 left-[770px] top-[552px] bg-green-900/20 rounded-full z-[2]"></div>
+    <div class="absolute w-11 h-11 left-[252px] top-[140px] bg-green-900/20 rounded-full z-[2]"></div>
+    <div class="absolute w-16 h-16 left-[274px] top-[-22px] bg-green-900/20 rounded-full z-[2]"></div>
+    <div class="absolute w-20 h-20 left-[696px] top-[-18px] bg-red-100/20 rounded-full z-[2]"></div>
+    <div class="absolute w-5 h-5 left-[837px] top-[358px] bg-white/20 rounded-full z-[2]"></div>
+    <div class="absolute w-9 h-9 left-[1139px] top-[53px] bg-white/20 rounded-full z-[2]"></div>
+    <div class="absolute w-40 h-40 left-[1309px] top-[-12px] bg-white/20 rounded-full z-[2]"></div>
+    <div class="absolute w-20 h-20 left-[1296px] top-[334px] bg-red-100/20 rounded-full z-[2]"></div>
+    <div class="absolute w-28 h-28 left-[995px] top-[114px] bg-red-100/20 rounded-full z-[2]"></div>
+
+    <!-- LOGO -->
+    <img src="LOGO10 1.png" alt="Logo Warung Bu Akip"
+      class="absolute w-[245px] h-[213px] left-[1023px] top-[145px] rounded-lg shadow-[0px_0px_28px_rgba(0,0,0,0.33)] z-[10]" />
+
+    <!-- TEKS JUDUL -->
+    <div class="absolute w-96 h-16 left-[957px] top-[354px] text-white text-5xl font-semibold font-['MuseoModerno'] z-[10]">
+      Selamat datang!
+    </div>
+    <div class="absolute w-96 h-16 left-[943px] top-[419px] text-white text-2xl font-normal font-['MuseoModerno'] z-[10]">
+      Warung Bu Akip
+    </div>
+
+    <!-- FORM LOGIN -->
+    <form action="#" method="post" class="absolute left-[927px] top-[480px] z-[15]">
+      <!-- USERNAME -->
+      <div class="flex items-center bg-stone-200 rounded-2xl w-[463px] h-14 mb-5 px-5">
+        <img src="account_circle.png" alt="Username Icon" class="w-6 h-6 mr-3 opacity-60">
+        <input type="text" name="username" placeholder="Username" required
+          class="bg-transparent outline-none text-black/70 text-lg w-full">
+      </div>
+
+      <!-- PASSWORD -->
+      <div class="flex items-center bg-stone-200 rounded-2xl w-[463px] h-14 mb-5 px-5">
+        <img src="padlock.png" alt="Password Icon" class="w-6 h-6 mr-3 opacity-60">
+        <input type="password" name="password" placeholder="Password" required
+          class="bg-transparent outline-none text-black/70 text-lg w-full">
+      </div>
+
+      <!-- LUPA PASSWORD -->
+      <div class="text-right mb-5">
+        <a href="#" class="text-white text-xl hover:underline">Forgot password?</a>
+      </div>
+
+      <!-- TOMBOL LOGIN -->
+      <button type="submit"
+        class="bg-orange-500 hover:bg-orange-600 transition w-[463px] h-14 rounded-2xl text-white text-xl font-medium shadow-[0px_0px_16px_rgba(0,0,0,0.3)]">
+        Sign In
+      </button>
+
+      <!-- SIGN UP -->
+      <div class="mt-5 flex justify-center space-x-2 text-white text-base">
+        <span>Don’t have an account?</span>
+        <a href="#" class="text-red-900 font-bold underline">Sign up</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
