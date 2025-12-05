@@ -1,0 +1,139 @@
+/* ===== WRAPPER DASHBOARD ===== */
+.dashboard-container {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+/* ===== FILTER BAR ===== */
+.filter-bar input[type="date"] {
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 8px 12px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.filter-bar input[type="date"]:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+}
+
+.filter-bar button {
+    background-color: #16a34a;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: 0.2s;
+    font-weight: 600;
+}
+
+.filter-bar button:hover {
+    background-color: #15803d;
+}
+
+/* ===== EXPORT BUTTON ===== */
+.filter-bar {
+    width: 100%;
+}
+
+.export-btn {
+    background-color: #2563eb;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 550;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.export-btn:hover {
+    background-color: #1d4ed8;
+}
+.filter-bar {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.filter-bar > .filter-left,
+.filter-bar > .export-right {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.filter-left {
+    gap: 12px !important;
+}
+
+.export-right {
+    justify-content: flex-end !important;
+}
+
+
+
+/* ===== TABEL LAPORAN ===== */
+.report-section {
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.report-section table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-section thead {
+    background: #f3f4f6;
+}
+
+.report-section th {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.report-section td {
+    padding: 12px;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 14px;
+}
+
+.report-section tr:hover {
+    background: #fff7d1;
+    transition: 0.15s;
+}
+
+/* ===== AKSI ICON ===== */
+.action-icons i {
+    font-size: 18px;
+    transition: 0.2s;
+}
+
+.action-icons i:hover {
+    transform: scale(1.15);
+}
+
+/* ===== PAGINATION ===== */
+.pagination nav button {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: none;
+    transition: 0.2s;
+}
+
+.pagination nav button:hover {
+    background: #d1d5db;
+}
+
+.pagination nav .active {
+    background: #e5e7eb;
+    font-weight: 700;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
