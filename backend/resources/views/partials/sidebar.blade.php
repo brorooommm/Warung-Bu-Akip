@@ -25,7 +25,7 @@
             </li>
             <li>
                 <img src="{{ asset('uil_setting.png') }}" alt="Settings Icon">
-                <a href="#">Pengaturan</a>
+                <a href="{{route ('admin.settings')}}">Pengaturan</a>
             </li>
         </ul>
     </nav>

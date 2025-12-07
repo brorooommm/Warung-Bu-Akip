@@ -117,7 +117,7 @@ class CashierController extends Controller
         $subtotal = $product->harga * $qty;
 
         $sale->products()->attach($product->id, [
-            'quantity' => $qty,
+            'qty' => $qty,
             'price' => $product->harga,
             'subtotal' => $subtotal,
         ]);
@@ -128,10 +128,9 @@ class CashierController extends Controller
 
     $sale->update(['total' => $totalSale]);
 
-    return redirect()->back()->with('transaction_success', true);
+    return redirect()->route('cashier.transaction')->with('transaction_success', true);
 
 }
-
 
 
     // Pengaturan Akun

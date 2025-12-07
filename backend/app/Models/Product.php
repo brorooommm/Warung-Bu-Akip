@@ -31,6 +31,12 @@ class Product extends Model
         });
     }
 
+    public function stockMovements()
+{
+    return $this->hasMany(StockMovement::class);
+}
+
+
     // Accessor untuk sisa hari sebelum expired
     public function getDaysLeftAttribute()
     {

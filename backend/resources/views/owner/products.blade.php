@@ -73,20 +73,59 @@
     .btn-cari :hover {
         background: #7a0101ff;
     }
+
+/* Wrapper agar tabel bisa discroll jika layar kecil */
+.table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+}
+
+/* Tabel lebih ramping */
+.compact-table th, 
+.compact-table td {
+    padding: 6px 8px !important;
+    font-size: 14px !important;
+    white-space: nowrap; /* mencegah kolom melebar */
+}
+
+/* Input diperkecil */
+.compact-table input {
+    width: 130px !important;
+    padding: 5px 6px;
+    font-size: 14px;
+}
+
+/* Baris tabel makin padat */
+.compact-table tr {
+    height: 38px;
+}
+
+/* Tombol update & delete lebih kecil */
+.action-btns {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-update, .btn-delete {
+    padding: 4px 10px !important;
+    font-size: 13px !important;
+}
 </style>
 
-<h1 class="text-3xl font-bold mb-4">📦 Daftar Produk</h1>
+<div class="flex justify-between items-center mb-3">
 
-{{-- Search & Filter --}}
-<div class="flex gap-3 items-center">
-    <form action="{{ route('owner.products') }}" method="GET">
+    {{-- Search --}}
+    <form action="{{ route('owner.products') }}" method="GET" class="flex items-center gap-2">
         <input type="text" name="search" placeholder="Cari produk..."
                value="{{ request('search') }}"
                class="search-box">
-        <button class="btn-cari" type="submit">
-            Cari
-        </button>
+        <button class="btn-cari" type="submit">Cari</button>
     </form>
+
+    {{-- Tambah Produk --}}
+    <a href="{{ route('owner.products.create') }}" class="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800">
+        + Tambah Produk
+    </a>
 </div>
 
 @if(session('success'))
@@ -95,52 +134,62 @@
     </div>
 @endif
 
-<div class="owner-card mt-6">
-    <table class="w-full owner-table">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama Produk</th>
-                <th>Harga</th>
-                <th>Stok</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($products as $product)
-            <tr>
-                <td>{{ $loop->iteration }}</td>
 
-                {{-- Form Update --}}
-                <form action="{{ route('owner.products.update', $product->id) }}" method="POST">
-                    @csrf
-                    @method('PATCH')
+    <div class="owner-card mt-6">
 
-                    <td>
-                        <input type="text" name="nama_produk" value="{{ $product->nama_produk }}">
-                    </td>
-                    <td>
-                        <input type="number" name="harga" value="{{ $product->harga }}">
-                    </td>
-                    <td>
-                        <input type="number" name="stok" value="{{ $product->stok }}">
-                    </td>
-                    <td class="flex gap-2">
-                        <button type="submit" class="btn-update">Update</button>
-                </form>
+    <div class="table-wrapper">
+        <table class="w-full owner-table compact-table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Produk</th>
+                    <th>Kode produk</th>
+                    <th>Harga</th>
+                    <th>Stok</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($products as $product)
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
 
-                {{-- Delete --}}
-                <form action="{{ route('owner.products.delete', $product->id) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn-delete"
-                            onclick="return confirm('Yakin ingin menghapus produk ini?')">Hapus</button>
-                </form>
-                    </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+                    <form action="{{ route('owner.products.update', $product->id) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+
+                        <td>
+                            <input type="text" name="nama_produk" value="{{ $product->nama_produk }}">
+                        </td>
+                        <td>
+                            <input type="number" name="kode_produk" value="{{ $product->kode_produk }}">
+                        </td>
+                        <td>
+                            <input type="number" name="harga" value="{{ $product->harga }}">
+                        </td>
+                        <td>
+                            <input type="number" name="stok" value="{{ $product->stok }}">
+                        </td>
+
+                        <td class="action-btns">
+                            <button type="submit" class="btn-update">Update</button>
+                    </form>
+
+                    <form action="{{ route('owner.products.delete', $product->id) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn-delete"
+                                onclick="return confirm('Yakin ingin menghapus produk ini?')">Hapus</button>
+                    </form>
+                        </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+
+
 </div>
 
 @endsection

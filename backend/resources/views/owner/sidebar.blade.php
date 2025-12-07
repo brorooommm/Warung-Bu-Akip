@@ -15,6 +15,11 @@
                 <img src="{{ asset('jam_document.png') }}" alt="Laporan Icon">
                 <a href="{{ route('laporanowner') }}">Laporan Keuangan</a>
             </li>
+          <li>
+    <img src="{{ asset('jam_document.png') }}" alt="Stock Icon">
+    <a href="{{ route('owner.damage') }}">Kurangi Stok</a>
+</li>
+
         </ul>
     </nav>
 

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
-use App\Models\FinancialRecord;
+use App\Models\StockMovement;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 
@@ -14,44 +14,85 @@ class ProductController extends Controller
     
 public function exportPdf(Request $request)
 {
-    $laporan = DB::table('sale_product')
+    $start = $request->start;
+    $end   = $request->end;
+
+    /* ---------------------------
+       1. AMBIL DATA PEMASUKAN
+       --------------------------- */
+    $pemasukan = DB::table('sale_product')
         ->join('sales', 'sales.id', '=', 'sale_product.sale_id')
         ->join('products', 'products.id', '=', 'sale_product.product_id')
-        ->join('products.id')
         ->select(
-            'sale_product.*',
-            'sales.created_at as sale_time',
+            'sales.created_at',
             'products.nama_produk',
+            'sale_product.qty',
+            'sale_product.subtotal as nominal'
         )
-        ->orderBy('sales.created_at', 'asc')
-        ->get();
+        ->when($start && $end, function ($q) use ($start, $end) {
+            return $q->whereBetween('sales.created_at', [
+                $start . " 00:00:00",
+                $end   . " 23:59:59"
+            ]);
+        })
+        ->get()
+        ->map(function ($row) {
+            $time = \Carbon\Carbon::parse($row->created_at);
+            $row->tanggal = $time->format('d-m-Y');
+            $row->waktu   = $time->format('H:i');
+            $row->tipe    = "Pemasukan";
+            return $row;
+        });
 
-    // Hitung total penjualan, modal, laba + format tanggal/waktu
-    $laporan = $laporan->map(function ($row) {
+    /* ---------------------------
+       2. AMBIL DATA PENGELUARAN
+       --------------------------- */
+    $pengeluaran = DB::table('stock_movements')
+        ->join('products', 'products.id', '=', 'stock_movements.product_id')
+        ->select(
+            'stock_movements.created_at',
+            'products.nama_produk',
+            'stock_movements.qty',
+            'stock_movements.total_cost as nominal'
+        )
+        ->when($start && $end, function ($q) use ($start, $end) {
+            return $q->whereBetween('stock_movements.created_at', [
+                $start . " 00:00:00",
+                $end   . " 23:59:59"
+            ]);
+        })
+        ->get()
+        ->map(function ($row) {
+            $time = \Carbon\Carbon::parse($row->created_at);
+            $row->tanggal = $time->format('d-m-Y');
+            $row->waktu   = $time->format('H:i');
+            $row->tipe    = "Pengeluaran";
+            return $row;
+        });
 
-        // format tanggal & waktu
-        $time = \Carbon\Carbon::parse($row->sale_time);
-        $row->tanggal = $time->format('Y-m-d');
-        $row->waktu   = $time->format('H:i:s');
+    /* ---------------------------
+       3. GABUNGKAN TIMELINE
+       --------------------------- */
+    $laporan = $pemasukan->merge($pengeluaran)->sortBy('created_at');
 
-        // total penjualan
-        $row->total_penjualan = $row->subtotal;
+    /* ---------------------------
+       4. HITUNG TOTAL
+       --------------------------- */
+    $totalPemasukan   = $pemasukan->sum('nominal');
+    $totalPengeluaran = $pengeluaran->sum('nominal');
+    $totalAkhir       = $totalPemasukan - $totalPengeluaran;
 
-        // harga modal per item
-        $modal_per_item = $row->package_buy_price / $row->items_per_package;
+    $pdf = \PDF::loadView('admin.laporan_pdf', [
+        'laporan'          => $laporan,
+        'totalPemasukan'   => $totalPemasukan,
+        'totalPengeluaran' => $totalPengeluaran,
+        'totalAkhir'       => $totalAkhir
+    ]);
 
-        // total modal = modal satuan × kuantitas terjual
-        $row->total_modal = $modal_per_item * $row->quantity;
-
-        // laba bersih
-        $row->laba_bersih = $row->total_penjualan - $row->total_modal;
-
-        return $row;
-    });
-
-    $pdf = \PDF::loadView('admin.laporan_pdf', compact('laporan'));
     return $pdf->download('laporan_penjualan.pdf');
 }
+
+
 
 
     public function index(Request $request)
@@ -141,39 +182,41 @@ public function exportPdf(Request $request)
 }
 
 
-    public function store(Request $request)
-    {
-        // Validasi input
-        $request->validate([
-            'nama_produk' => 'required',
-            'harga' => 'required|numeric',
-            'stok' => 'required|integer',
-            'kategori_id' => 'required|exists:categories,id',
-            'kode_produk' => 'required|unique:products,kode_produk',
-            'modal_per_produk' => 'required|numeric',
-        ]);
+   public function store(Request $request)
+{
+    // Validasi input
+    $request->validate([
+        'nama_produk' => 'required',
+        'harga' => 'required|numeric',
+        'stok' => 'required|integer',
+        'kategori_id' => 'required|exists:categories,id',
+        'kode_produk' => 'required|unique:products,kode_produk',
+        'modal_per_produk' => 'required|numeric',
+    ]);
 
-        // Simpan produk baru
-        Product::create([
-            'nama_produk' => $request->nama_produk,
-            'harga' => $request->harga,
-            'stok' => $request->stok,
-            'kategori_id' => $request->kategori_id,
-            'kode_produk' => $request->kode_produk,
-            'modal_per_produk' => $request->modal_per_produk ?? 0,
-        ]);
+    // Simpan produk baru ke variabel $product
+    $product = Product::create([
+        'nama_produk' => $request->nama_produk,
+        'harga' => $request->harga,
+        'stok' => $request->stok,
+        'kategori_id' => $request->kategori_id,
+        'kode_produk' => $request->kode_produk,
+        'modal_per_produk' => $request->modal_per_produk,
+    ]);
 
-        FinancialRecord::create([
-    'pendapatan' => null,
-    'pengeluaran' => $request->modal_per_produk * $request->stok,
-    'keterangan' => "Pengeluaran dari transaksi ID: $request->id",
-    'jenis' => 'pengeluaran',
-    'reference_id' => null,
-    'reference_type' => 'product',
-]);
+    // Catat pergerakan stok awal
+    StockMovement::create([
+        'product_id' => $product->id,
+        'type' => 'restock', // type 'initial' tidak ada di enum, gunakan restock
+        'qty' => $product->stok,
+        'unit_cost' => $product->modal_per_produk,
+        'total_cost' => $product->stok * $product->modal_per_produk,
+        'created_by' => auth()->id(),
+    ]);
 
-        return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan.');
-    }
+    return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan.');
+}
+
 
     public function edit($id)
     {
@@ -194,6 +237,8 @@ public function exportPdf(Request $request)
             'kategori_id' => 'required|exists:categories,id',
         ]);
 
+
+
         $product->update($request->all());
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui.');
@@ -207,27 +252,31 @@ public function exportPdf(Request $request)
         return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus.');
     }
 
-   public function updateStock(Request $request, $id)
+  public function updateStock(Request $request, $id)
 {
     $product = Product::findOrFail($id);
 
     $request->validate([
         'stok' => 'required|integer|min:' . $product->stok,
     ], [
-        'stok.min' => 'Stok tidak boleh berkurang dari stok sebelumnya (' . $product->stok . ')',
+        'stok.min' => 'Stok tidak boleh kurang dari stok sebelumnya (' . $product->stok . ')',
     ]);
 
-    // Tambah stok
+    // Hitung selisih stok
+    $qty = $request->stok - $product->stok;
+
+    // Update stok
     $product->stok = $request->stok;
     $product->save();
 
-    FinancialRecord::create([
-        'pendapatan' => null,
-        'pengeluaran' => ($request->stok - $product->stok) * $product->modal_per_produk,
-        'keterangan' => "Penambahan stok untuk produk ID: $product->id",
-        'jenis' => 'pengeluaran',
-        'reference_id' => $product->id,
-        'reference_type' => 'product',
+    // Catat pergerakan stok
+    StockMovement::create([
+        'product_id' => $product->id,
+        'type' => 'restock',
+        'qty' => $qty,
+        'unit_cost' => $product->modal_per_produk,
+        'total_cost' => $qty * $product->modal_per_produk,
+        'created_by' => auth()->id(),
     ]);
 
     return back()->with('success', 'Stok berhasil diperbarui');
@@ -362,90 +411,119 @@ public function laporan(Request $request)
 }
 public function performanceCategory(Request $request)
 {
-    $laporan = DB::table('sales')
-        ->join('sale_product', 'sales.id', '=', 'sale_product.sale_id')
+    $laporan = DB::table('sale_product')
+        ->join('sales', 'sales.id', '=', 'sale_product.sale_id')
         ->join('products', 'products.id', '=', 'sale_product.product_id')
         ->leftJoin('categories', 'products.kategori_id', '=', 'categories.id')
         ->select(
-            'sales.id as sale_id',
-            'sales.created_at',
+            'products.id as product_id',
             'products.nama_produk as product_name',
             'categories.nama_kategori as category_name',
-            'sale_product.quantity',
-            DB::raw('sale_product.subtotal as laba_kotor'),
-          );
+            DB::raw('SUM(sale_product.qty) as total_qty'),
+            DB::raw('SUM(sale_product.subtotal) as total_laba_kotor'),
+            DB::raw('MIN(sales.created_at) as first_sold'),
+            DB::raw('MAX(sales.created_at) as last_sold')
+        );
 
-    // 🔥 FILTER PER PERIODE
+    // 🔥 FILTER PER PERIODE (default: none)
     if ($request->periode) {
-        $days = $request->periode * 30; // 1 = 30 hari, 3 = 90 hari, dst
+        $days = $request->periode * 30;
         $laporan->where('sales.created_at', '>=', now()->subDays($days));
     }
 
-    $laporan = $laporan->orderBy('sale_product.quantity', 'desc')->get();
+    $laporan = $laporan
+        ->groupBy('products.id', 'products.nama_produk', 'categories.nama_kategori')
+        ->orderBy('total_qty', 'desc')
+        ->get();
 
     return view('perform', compact('laporan'));
 }
 
+public function riwayatTransaksi(Request $request)
+{
+    // Ambil semua riwayat transaksi (pemasukan)
+    $history = DB::table('sale_product')
+        ->join('sales', 'sales.id', '=', 'sale_product.sale_id')
+        ->join('products', 'products.id', '=', 'sale_product.product_id')
+        ->select(
+            'sales.created_at as waktu',
+            'products.nama_produk',
+            'sale_product.qty',
+            DB::raw('sale_product.qty * sale_product.price as total')
+        )
+        ->orderBy('sales.created_at', 'desc')
+        ->get();
+
+    return view('admin.transaction_history', compact('history'));
+}
 
 
 public function adminDashboard()
 {
     // ===========================
-    // 1. PENDAPATAN PER HARI
+    // 1. Pendapatan per Hari
     // ===========================
-    $dailySales = \DB::table('sales')
-        ->join('sale_product', 'sales.id', '=', 'sale_product.sale_id')
-        ->selectRaw('DATE(sales.created_at) AS date, SUM(sale_product.subtotal) AS total')
-        ->groupBy('date')
-        ->orderBy('date')
+    $sales = DB::table('sales')
+        ->selectRaw("DATE(created_at) as date, SUM(total) as total_harian")
+        ->groupByRaw("DATE(created_at)")
+        ->orderBy('date', 'ASC')
         ->get();
 
-    // Ambil array tanggal & total untuk grafik
-    $dates = $dailySales->pluck('date');
-    $totals = $dailySales->pluck('total');
-
+    $dates  = $sales->pluck('date');
+    $totals = $sales->pluck('total_harian');
 
     // ===========================
-    // 2. TOTAL PENJUALAN (SEHARI & BULAN INI)
+    // 2. Total Penjualan Harian & Bulanan
     // ===========================
-    $todaySales = \DB::table('sale_product')
+    $today      = now()->toDateString();
+    $month      = now()->month;
+    $year       = now()->year;
+
+    $todaySales = DB::table('sale_product')
         ->join('sales', 'sales.id', '=', 'sale_product.sale_id')
-        ->whereDate('sales.created_at', now()->toDateString())
+        ->whereDate('sales.created_at', $today)
         ->sum('sale_product.subtotal');
 
-    $monthSales = \DB::table('sale_product')
+    $monthSales = DB::table('sale_product')
         ->join('sales', 'sales.id', '=', 'sale_product.sale_id')
-        ->whereMonth('sales.created_at', now()->month)
-        ->whereYear('sales.created_at', now()->year)
+        ->whereMonth('sales.created_at', $month)
+        ->whereYear('sales.created_at', $year)
         ->sum('sale_product.subtotal');
 
-
     // ===========================
-    // 3. TOTAL TRANSAKSI HARI INI
+    // 3. Total Transaksi Hari Ini
     // ===========================
-    $transactionsToday = \DB::table('sales')
-        ->whereDate('created_at', now()->toDateString())
+    $transactionsToday = DB::table('sales')
+        ->whereDate('created_at', $today)
         ->count();
 
+    // ===========================
+    // 4. Total Produk
+    // ===========================
+    $totalProducts = DB::table('products')->count();
 
     // ===========================
-    // 4. TOTAL PRODUK
+    // 5. Produk Terlaris
     // ===========================
-    $totalProducts = \DB::table('products')->count();
+    $bestProduct = DB::table('sale_product')
+        ->join('products', 'sale_product.product_id', '=', 'products.id')
+        ->select('products.nama_produk', DB::raw('SUM(sale_product.qty) as total_jual'))
+        ->groupBy('products.id', 'products.nama_produk')
+        ->orderByDesc('total_jual')
+        ->first();
 
-
     // ===========================
-    // KIRIM KE VIEW
+    // Return ke View
     // ===========================
-    return view('admin', [
-        'dates' => $dates,
-        'totals' => $totals,
-        'todaySales' => $todaySales,
-        'monthSales' => $monthSales,
-        'transactionsToday' => $transactionsToday,
-        'totalProducts' => $totalProducts
-    ]);
+    return view('admin', compact(
+        'dates',
+        'totals',
+        'todaySales',
+        'monthSales',
+        'transactionsToday',
+        'totalProducts',
+        'bestProduct'
+    ));
 }
-
 
 }

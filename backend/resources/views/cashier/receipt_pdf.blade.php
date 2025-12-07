@@ -32,7 +32,7 @@
             @foreach ($transaction->products as $product)
                 <tr>
                     <td>{{ $product->nama_produk }}</td>
-                    <td>{{ $product->pivot->quantity }}</td>
+                    <td>{{ $product->pivot->qty }}</td>
                     <td>{{ number_format($product->pivot->price) }}</td>
                     <td>{{ number_format($product->pivot->subtotal) }}</td>
                 </tr>

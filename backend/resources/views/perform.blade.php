@@ -55,10 +55,10 @@
 
                             <td class="p-3">{{ $row->product_name }}</td>
                             <td class="p-3">{{ $row->category_name }}</td>
-                            <td class="p-3">{{ $row->quantity }}</td>
+                            <td class="p-3">{{ $row->total_qty }}</td>
 
                             <td class="p-3">
-                                Rp {{ number_format($row->laba_kotor, 0, ',', '.') }}
+                                Rp {{ number_format($row->total_laba_kotor, 0, ',', '.') }}
                             </td>
 
                         </tr>

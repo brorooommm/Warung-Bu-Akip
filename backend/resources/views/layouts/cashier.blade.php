@@ -23,14 +23,6 @@
                 <img src="{{ asset('dashboard-interface.png') }}" alt="Dashboard Icon" class="w-5 h-5">
                 <a href="{{ route('cashier.transaction') }}" class="text-white">Dashboard</a>
             </li>
-            <li class="flex items-center gap-3 px-6 py-3 hover:bg-yellow-300 transition {{ request()->routeIs('cashier.products') ? 'bg-yellow-400 font-semibold' : '' }}">
-                <img src="{{ asset('prod-icon.png') }}" alt="Produk Icon" class="w-5 h-5">
-                <a href="{{ route('cashier.products') }}" class="text-white">Produk</a>
-            </li>
-            <li class="flex items-center gap-3 px-6 py-3 hover:bg-yellow-300 transition {{ request()->routeIs('cashier.expired') ? 'bg-yellow-400 font-semibold' : '' }}">
-                <img src="{{ asset('jam_document.png') }}" alt="Laporan Icon" class="w-5 h-5">
-                <a href="{{ route('cashier.expired') }}" class="text-white">Laporan Kadaluarsa</a>
-            </li>
         </ul>
     </nav>
 

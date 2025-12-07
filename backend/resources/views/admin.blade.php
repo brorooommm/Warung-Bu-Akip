@@ -340,7 +340,7 @@
 
                 <li>
                     <img src="{{ asset('uil_setting.png') }}" alt="">
-                    <a href="#">Pengaturan</a>
+                    <a href="{{route('admin.settings')}}">Pengaturan</a>
                 </li>
             </ul>
         </nav>
@@ -379,10 +379,16 @@
 
             <!-- LEFT COLUMN -->
             <div class="left-column">
-                <a class="card total-products" href="{{ route('perform') }}">Produk Terlaris</a>
-                <a class="card low-stock" href="#">Produk Krisis</a>
+                <a class="card total-products" href="{{ route('perform') }}">
+    Produk Terlaris 
+    <br>
+    <span style="font-size:14px; font-weight:400;">
+        #1: {{ $bestProduct->nama_produk ?? 'Tidak Ada Data' }}
+    </span>
+</a>
+                <a class="card low-stock" href="{{ route('manage.stock')}}">Produk Krisis</a>
                 <a class="card total-sales" href="{{ route('laporanAdmin') }}">Laporan Harian</a>
-                <a class="card transactions-today" href="#">Riwayat Transaksi</a>
+                <a class="card transactions-today" href="{{route ('admin.history')}}">Riwayat Transaksi</a>
             </div>
 
             <!-- RIGHT COLUMN -->
